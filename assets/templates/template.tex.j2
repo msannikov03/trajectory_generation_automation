@@ -1,0 +1,127 @@
+\documentclass[a4paper,11pt]{article} % Changed font size slightly
+\usepackage[utf8]{inputenc} % Handle UTF-8 text better
+\usepackage[T1]{fontenc}    % Use modern font encodings
+\usepackage{graphicx}
+\usepackage{geometry}
+\usepackage{array}          % For table column definitions
+\usepackage{booktabs}       % Nicer table rules (toprule, midrule, bottomrule)
+\usepackage{multirow}
+%\usepackage{tikz}          % Keep if you plan complex overlays later
+\usepackage{xcolor}
+\usepackage{helvet}         % Use Helvetica font
+\usepackage{hyperref}       % For clickable links (optional)
+\usepackage{caption}        % Better control over caption spacing
+
+\renewcommand{\familydefault}{\sfdefault} % Set sans-serif as default
+\geometry{left=2.5cm, right=2.5cm, top=2.5cm, bottom=2.5cm} % Adjusted margins slightly
+
+% Define standard colors (optional)
+%\definecolor{IkeaBlue}{RGB}{0,81,186}
+%\definecolor{IkeaYellow}{RGB}{255,218,0}
+
+% Hyperref setup (optional)
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,
+    urlcolor=cyan,
+    pdftitle={\VAR{title}},
+    pdfpagemode=FullScreen,
+}
+
+% Reduce space between image and caption
+\captionsetup[figure]{skip=5pt}
+
+\begin{document}
+
+% --- Title Page ---
+\begin{titlepage}
+    \centering
+    \vspace*{1cm}
+    {\Huge \textbf{\VAR{ title|e }}}\\[1.5cm] % |e escapes LaTeX special chars in title
+
+    % Check if overview image exists before including
+    \IfFileExists{\VAR{ overview_image }}{
+        \includegraphics[width=0.75\textwidth, keepaspectratio]{\VAR{ overview_image }}
+    }{
+        \fbox{Overview Image Not Found} % Placeholder if image missing
+    }\\[1cm]
+
+    {\large \textbf{Assembly Instructions}}\\[0.5cm]
+
+    \textbf{Model: \VAR{ model_id|e }}\\[0.5cm]
+
+    \textbf{Estimated Assembly Time: \VAR{ time_estimate|e }}
+
+    \vfill % Pushes content to top and bottom
+    % Optional: Add logo or date at bottom
+    % \today
+\end{titlepage}
+
+\newpage
+
+% --- Components List / Parts Diagram ---
+\BLOCK{if has_parts_diagram and parts_diagram_image}
+    \section*{Components List}
+    \begin{figure}[htbp] % Use figure environment for better placement
+        \centering
+        \IfFileExists{\VAR{ parts_diagram_image }}{
+             \includegraphics[width=0.95\textwidth, keepaspectratio]{\VAR{ parts_diagram_image }}
+        }{
+             \fbox{Parts Diagram Not Found}
+        }
+        \caption*{Before starting assembly, please identify all parts shown above. Check quantities against the Bill of Materials on the last page.}
+    \end{figure}
+    \clearpage % Ensure diagram doesn't overlap with steps
+\BLOCK{endif}
+
+
+% --- Assembly Steps ---
+\BLOCK{for step in steps}
+    \section*{Step \VAR{ loop.index }}
+    \begin{figure}[htbp] % Use figure environment
+        \centering
+         % Check if step image exists
+         \BLOCK{if step.image}
+             \IfFileExists{\VAR{ step.image }}{
+                \includegraphics[width=0.85\textwidth, keepaspectratio]{\VAR{ step.image }}
+             }{
+                \fbox{Step \VAR{loop.index} Image Not Found}
+             }
+             \caption*{\VAR{ step.caption|e }} % Use caption* for unnumbered caption below image
+         \BLOCK{else}
+              % Handle case where step has no image (e.g., text only instruction)
+              \VAR{ step.caption|e }
+         \BLOCK{endif}
+    \end{figure}
+    % Only add newpage if not the last step
+    \BLOCK{if not loop.last}\clearpage\BLOCK{endif}
+\BLOCK{endfor}
+
+
+% --- Bill of Materials (BOM) ---
+\clearpage % Ensure BOM is on its own page
+\section*{Bill of Materials (BOM)}
+\begin{center}
+    % Use booktabs for better table formatting
+    \begin{tabular}{@{}llr@{}} % Adjust alignment: l=left, c=center, r=right
+    \toprule
+    \textbf{Part Number} & \textbf{Part Name} & \textbf{Quantity} \\
+    \midrule
+    \BLOCK{for part in parts}
+        \VAR{ part.number|e } & \VAR{ part.name|e } & \VAR{ part.quantity } \\ % Assume quantity is numeric
+    \BLOCK{else}
+        \multicolumn{3}{c}{No parts listed.} \\ % Message if parts list is empty
+    \BLOCK{endfor}
+    \bottomrule
+    \end{tabular}
+\end{center}
+
+\vfill % Pushes BOM table up
+
+\begin{center}
+    \textbf{Thank you for choosing our furniture!}
+    % Optional: Add contact info or website
+\end{center}
+
+\end{document}

@@ -1,0 +1,6 @@
+watchdog==3.0.0
+Jinja2==3.1.2
+pandas==2.0.3
+PyPDF2==3.0.1
+svgwrite==1.4.3
+pillow==10.0.0
